@@ -27,9 +27,9 @@ def find_start_and_end(grid):
     else:
         print("start or goal not found")
 
-def heuristic(a_y, a_x, b_y, b_x):
+def heuristic(a, b):
     # chebyshev distance on a grid
-    return max(abs(b_x - a_x), abs(b_y - a_y))
+    return max(abs(b[1] - a[1]), abs(b[0] - a[0]))
 
 def main():
     # file input

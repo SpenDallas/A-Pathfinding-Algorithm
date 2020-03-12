@@ -29,7 +29,7 @@ def find_start_and_end(grid):
 
 def heuristic(a_y, a_x, b_y, b_x):
     # chebyshev distance on a grid
-    return max(abs(b_x - a_x), abs(b_y - a-y))
+    return max(abs(b_x - a_x), abs(b_y - a_y))
 
 def main():
     # file input

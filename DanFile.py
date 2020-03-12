@@ -2,6 +2,33 @@
 dan file bro
 '''
 
+def find_start_and_end(grid):
+    s_found = False
+    g_found = False
+    for y in range(len(grid)):
+        if s_found and g_found: # break if both start and goal points have been found
+            break
+        if "S" in grid[y]: # if start is in this row
+            for x in range(len(grid[y])): # get the coordinates
+                if grid[y][x] == "S":
+                    x_start = x
+                    y_start = y
+                    s_found = True
+                    break
+        if "G" in grid[y]: # if goal is in this row
+            for x in range(len(grid[y])): # get the coordinates
+                if grid[y][x] == "G":
+                    x_goal = x
+                    y_goal = y
+                    g_found = True
+                    break
+    if s_found and g_found:
+        return (x_start, y_start), (x_goal, y_goal)
+    else:
+        print("start or goal not found")
+
+
+
 
 def main():
     # file input
@@ -10,7 +37,10 @@ def main():
 
     #
     # the grid variable is the initial state; do stuff and set the solution to grid
+    # grid goes grid[row][column]
     #
+    start_coords, goal_coords = find_start_and_end(grid)
+    print(start_coords, goal_coords)
 
     # file output
     with open("pathfinding_a_out.txt", 'w') as f_output:

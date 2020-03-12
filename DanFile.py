@@ -23,7 +23,7 @@ def find_start_and_end(grid):
                     g_found = True
                     break
     if s_found and g_found:
-        return (x_start, y_start), (x_goal, y_goal)
+        return (y_start, x_start), (y_goal, x_goal)
     else:
         print("start or goal not found")
 

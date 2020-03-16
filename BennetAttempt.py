@@ -35,11 +35,13 @@ def heuristic(a, b):
 def getneighbours(graph, coord):
     neighbours = []
 
-    for y in range(coord[0] - 1, coord[0] + 1):
-        for x in range(coord[1] - 1, coord[1] + 1):
-            if y in range(0, len(graph)) and x in range(0, len(graph[0])) and graph[y][x] != 'X':
+    for y in range(coord[0] - 1, coord[0] + 2):
+        for x in range(coord[1] - 1, coord[1] + 2):
+            if y in range(0, len(graph)) and x in range(0, len(graph[0])) and \
+            graph[y][x] != 'X' and (y, x) != coord:
                 neighbours.append((y, x))
     
+    print(neighbours)
     return neighbours
 
 def main():
@@ -52,6 +54,7 @@ def main():
     # grid goes grid[row][column]
     #
     start_coords, goal_coords = find_start_and_end(grid)
+    print(goal_coords)
     frontier = []
     heapq.heappush(frontier, (0, start_coords))
     came_from = {}
@@ -65,6 +68,7 @@ def main():
         if current == goal_coords:
             break
 
+        print(current)
         for neighbour in getneighbours(grid, current): 
             new_cost = cost_so_far[current] + 1
             if neighbour not in cost_so_far or new_cost < cost_so_far[neighbour]:

@@ -1,4 +1,5 @@
 import heapq
+import math
 '''
 bennet file bro
 '''
@@ -28,9 +29,13 @@ def find_start_and_end(grid):
     else:
         print("start or goal not found")
 
-def heuristic(a, b):
+def cheuristic(a, b):
     # Chebyshev distance on a grid
     return max(abs(b[1] - a[1]), abs(b[0] - a[0]))
+
+def eheuristic(a, b):
+    # Euclidian distance between two points
+    return math.sqrt(math.pow(b[1] - a[1], 2) + math.pow(b[0] - a[0], 2)) 
 
 def getneighbours(graph, coord):
     neighbours = []
@@ -61,23 +66,26 @@ def main():
     cost_so_far = {}
     came_from[start_coords] = None
     cost_so_far[start_coords] = 0
+    path = []
 
     while len(frontier) > 0: 
-        current = heapq.heappop(frontier)[1]
-        
+        current = heapq.heappop(frontier)[1] 
+
         if current == goal_coords:
             break
+
+        path.append(current)
 
         print(current)
         for neighbour in getneighbours(grid, current): 
             new_cost = cost_so_far[current] + 1
             if neighbour not in cost_so_far or new_cost < cost_so_far[neighbour]:
                 cost_so_far[neighbour] = new_cost
-                priority = new_cost + heuristic(goal_coords, neighbour)
+                priority = new_cost + eheuristic(goal_coords, neighbour)
                 heapq.heappush(frontier, (priority, neighbour))
                 came_from[neighbour] = current
 
-    print(came_from)
+    print(path)
         
 
     # file output

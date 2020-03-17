@@ -30,6 +30,15 @@ def parse_input():
     """
     Takes the file and puts it in a more python friendly format
     :return: a list of the inputs
+
+    The final list is of the following form:
+    list = [[[('NodeName','MIN/MAX'), ... ,('NodeName','MIN/MAX')], [('NodeName', 'Child'), ... ,('NodeName', 'Child')]], [[('NodeName','MIN/MAX'), ... ,('NodeName','MIN/MAX')], [('NodeName', 'Child'), ... ,('NodeName', 'Child')]]]
+                                                                                                                        ^ end of a line in the input file
+    list[i] would give you [[('NodeName','MIN/MAX'), ... ,('NodeName','MIN/MAX')], [('NodeName', 'Child'), ... ,('NodeName', 'Child')]]
+    list[i][0] would give you [('NodeName','MIN/MAX'), ... ,('NodeName','MIN/MAX')]
+       list[i][0][j] would give you ('NodeName','MIN/MAX')
+    list[i][1] would give you [('NodeName', 'Child'), ... ,('NodeName', 'Child')]
+       list[i][1][j] would give you ('NodeName', 'Child')
     """
     with open("alphabeta.txt", 'r') as f_input:
         file_raw = [line for line in f_input.readlines()]
@@ -44,10 +53,7 @@ def parse_input():
         for k in range(len(file_text[i][1])):  # splitting tuples
             file_text[i][1][k] = tuple(file_text[i][1][k].split(','))
 
-    print(file_text)
-
-
-
+    return file_text
 
 
 def main():

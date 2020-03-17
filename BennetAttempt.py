@@ -49,9 +49,17 @@ def getneighbours(graph, coord):
     print(neighbours)
     return neighbours
 
+def clean_queue(queue, tuple):
+    for i in range(0, len(queue) - 1):
+        if queue[i][1] == tuple:
+            queue.pop(i)
+            heapq.heapify(queue)
+
+    return queue
+
 def main():
     # file input
-    with open("pathfinding_a.txt", 'r') as f_input:
+    with open("pathfinding_b.txt", 'r') as f_input:
         grid = [[x for x in line if x != "\n"] for line in f_input.readlines()]
 
     #
@@ -74,14 +82,23 @@ def main():
         if current == goal_coords:
             break
 
-        path.append(current)
+        if current != start_coords:
+            path.append(current)
 
         print(current)
-        for neighbour in getneighbours(grid, current): 
+        for neighbour in getneighbours(grid, current):
+            if neighbour == goal_coords:
+                cost_so_far[neighbour] = 0
+                priority = 0
+                heapq.heappush(frontier, (priority, neighbour))
+                came_from[neighbour] = current
+                break
+
             new_cost = cost_so_far[current] + 1
-            if neighbour not in cost_so_far or new_cost < cost_so_far[neighbour]:
+            if neighbour not in cost_so_far or new_cost > cost_so_far[neighbour]:
                 cost_so_far[neighbour] = new_cost
-                priority = new_cost + eheuristic(goal_coords, neighbour)
+                priority = new_cost + cheuristic(goal_coords, neighbour)
+                clean_queue(frontier, neighbour)
                 heapq.heappush(frontier, (priority, neighbour))
                 came_from[neighbour] = current
 
@@ -89,7 +106,7 @@ def main():
         
 
     # file output
-    with open("pathfinding_a_out.txt", 'w') as f_output:
+    with open("pathfinding_b_out.txt", 'w') as f_output:
         output_list = []
         # convert to a 1D list of strings
         for line in grid:

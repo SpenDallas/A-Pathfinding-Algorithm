@@ -8,22 +8,53 @@ class AlphaBetaNode:
     """
     class for nodes in the alpha beta tree
     """
-    def __init__(self, data, node_type, alpha, beta):
+    def __init__(self, data, node_type):
         # all the attributes
         self.data = data
-        self.alpha = alpha
-        self.beta = beta
-        self.left_child = None
-        self.right_child = None
+        self.children = []
+        self.alpha = None
+        self.beta = None
+        self.following_nodes = [data]  # following nodes contain the root as well
         if (node_type.lower() != "min") and (node_type.lower() != "max"):  # invalid entry checking
             raise ValueError('type attribute in AlphaBetaNode object must be either "min" or "max"')
+        else:
+            self.node_type = node_type
 
-    # these functions are self explanatory; insert anything, including other nodes
-    def insert_left_child(self, input_child):
-        self.left_child = input_child
+    # inserts a child / appends to the child list
+    def insert_child(self, input_child):
+        self.children.append(input_child)
 
-    def insert_right_child(self, input_child):
-        self.right_child = input_child
+
+class AlphaBetaTree:
+    """
+    class for an alpha beta tree
+    final leaf nodes are assumed to be of type int
+    all other nodes are assumed to be of type str
+    """
+    def __init__(self, root_data, root_node_type):
+        self.root = AlphaBetaNode(root_data, root_node_type)
+
+    def insert(self, parent, child_data, child_type=None):
+        if self.root.data == parent:  # if this node is the direct parent of the child we are adding
+            if isinstance(child_data, int):  # if the end of the tree
+                self.root.insert_child(child_data)
+            else:  # if not the end of the tree
+                new_tree = AlphaBetaTree(child_data, child_type)
+                self.root.insert_child(new_tree)
+                self.root.following_nodes.append(child_data)
+        else:
+            for i in range(len(self.root.children)):
+                if parent in self.root.children[i].root.following_nodes:
+                    self.root.following_nodes.append(child_data)  # add this
+                    self.root.children[i].insert(parent, child_data, child_type)
+                    break
+
+
+
+
+
+
+
 
 
 def parse_input():
@@ -56,9 +87,61 @@ def parse_input():
     return file_text
 
 
+def TreeTest():
+    test = AlphaBetaTree('A', 'MIN')
+    test.insert('A', 'B', 'MAX')
+    test.insert('A', 'C', 'MAX')
+    test.insert('B', 19)
+    # A->B->19
+    print(test.root.children[0].root.children[0])  # should print 19
+    # set alpha and beta of B to 7 and 8
+    test.root.children[0].root.alpha = 7
+    test.root.children[0].root.beta = 8
+    print(test.root.children[0].root.data)  # should print B
+    print(test.root.children[0].root.alpha)  # should print 7
+    print(test.root.children[0].root.beta)  # should print 8
+    print(test.root.children[0].root.node_type)  # should print MAX
+
+    # testing a larger tree
+    test2 = AlphaBetaTree('A', 'MIN')
+    test2.insert('A', 'B', 'MAX')
+    test2.insert('A', 'C', 'MAX')
+    test2.insert('B', 'D', 'MIN')
+    test2.insert('A', 'E', 'MAX')
+    test2.insert('B', 'F', 'MIN')
+    test2.insert('B', 'G', 'MIN')
+    test2.insert('D', 20)
+    test2.insert('D', 21)
+    test2.insert('D', 22)
+    print(test2.root.children[0].root.children[0].root.children[0])  # should print 20
+    print(test2.root.children[0].root.children[0].root.children[1])  # should print 21
+    print(test2.root.children[0].root.children[0].root.children[2])  # should print 22
+
+    '''
+    Explanation of AlphaBetaTree structure
+    test.root will give you an AlphaBetaNode type meaning;
+    test.root.data will give you the data/name of the node
+    test.root.children[n] will give you the nth child
+    say we had a tree that looked like:
+                A
+               / \
+              B   C
+             /
+            19
+    to get the AlphaBetaTree B, we do:
+    test.root.children[0].root
+    to access its data, we do:
+    test.root.children[0].root.data
+    
+    to get 19, we do:
+    test.root.children[0].root.children[0]
+    this is because final leaves are stored directly in the children list
+    '''
+
+
 def main():
-    parse_input()
+    pass
 
 
 if __name__ == "__main__":
-    main()
+    TreeTest()

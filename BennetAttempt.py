@@ -1,24 +1,26 @@
 import heapq
 import math
+
 '''
 bennet file bro
 '''
+
 
 def find_start_and_end(grid):
     s_found = False
     g_found = False
     for y in range(len(grid)):
-        if s_found and g_found: # break if both start and goal points have been found
+        if s_found and g_found:  # break if both start and goal points have been found
             break
-        if "S" in grid[y]: # if start is in this row
-            for x in range(len(grid[y])): # get the coordinates
+        if "S" in grid[y]:  # if start is in this row
+            for x in range(len(grid[y])):  # get the coordinates
                 if grid[y][x] == "S":
                     x_start = x
                     y_start = y
                     s_found = True
                     break
-        if "G" in grid[y]: # if goal is in this row
-            for x in range(len(grid[y])): # get the coordinates
+        if "G" in grid[y]:  # if goal is in this row
+            for x in range(len(grid[y])):  # get the coordinates
                 if grid[y][x] == "G":
                     x_goal = x
                     y_goal = y
@@ -29,33 +31,48 @@ def find_start_and_end(grid):
     else:
         print("start or goal not found")
 
+
 def cheuristic(a, b):
     # Chebyshev distance on a grid
     return max(abs(b[1] - a[1]), abs(b[0] - a[0]))
 
+
 def eheuristic(a, b):
     # Euclidian distance between two points
-    return math.sqrt(math.pow(b[1] - a[1], 2) + math.pow(b[0] - a[0], 2)) 
+    return math.sqrt(math.pow(b[1] - a[1], 2) + math.pow(b[0] - a[0], 2))
+
 
 def getneighbours(graph, coord):
     neighbours = []
 
     for y in range(coord[0] - 1, coord[0] + 2):
         for x in range(coord[1] - 1, coord[1] + 2):
-            if y in range(0, len(graph)) and x in range(0, len(graph[0])) and \
-            graph[y][x] != 'X' and (y, x) != coord:
+            if y in range(0, len(graph)) and x in range(0, len(graph[0])) and graph[y][x] != 'X' and (y, x) != coord:
                 neighbours.append((y, x))
-    
-    print(neighbours)
+    # print(neighbours)
     return neighbours
 
-def clean_queue(queue, tuple):
+
+def clean_queue(queue, tup):
     for i in range(0, len(queue) - 1):
-        if queue[i][1] == tuple:
+        if queue[i][1] == tup:
             queue.pop(i)
             heapq.heapify(queue)
 
     return queue
+
+
+def grid_print(grid):
+    for line in range(len(grid)):
+        print(grid[line])
+    print("")
+
+
+def final_grid(path, grid):
+    for coords in path:
+        grid[coords[0]][coords[1]] = 'P'
+    return grid
+
 
 def main():
     # file input
@@ -67,7 +84,7 @@ def main():
     # grid goes grid[row][column]
     #
     start_coords, goal_coords = find_start_and_end(grid)
-    print(goal_coords)
+    # print(goal_coords)
     frontier = []
     heapq.heappush(frontier, (0, start_coords))
     came_from = {}
@@ -76,8 +93,8 @@ def main():
     cost_so_far[start_coords] = 0
     path = []
 
-    while len(frontier) > 0: 
-        current = heapq.heappop(frontier)[1] 
+    while len(frontier) > 0:
+        current = heapq.heappop(frontier)[1]
 
         if current == goal_coords:
             break
@@ -85,7 +102,7 @@ def main():
         if current != start_coords:
             path.append(current)
 
-        print(current)
+        # print(current)
         for neighbour in getneighbours(grid, current):
             if neighbour == goal_coords:
                 cost_so_far[neighbour] = 0
@@ -102,9 +119,8 @@ def main():
                 heapq.heappush(frontier, (priority, neighbour))
                 came_from[neighbour] = current
 
-    print(path)
-        
-
+    # print(path)
+    grid_print(final_grid(path, grid))
     # file output
     with open("pathfinding_b_out.txt", 'w') as f_output:
         output_list = []
@@ -115,6 +131,7 @@ def main():
         output_list[-1] = output_list[-1][:-1]
         # writing to the file
         f_output.writelines(output_list)
+
 
 if __name__ == "__main__":
     main()

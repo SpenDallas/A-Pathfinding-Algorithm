@@ -2,8 +2,6 @@
 Node class for alpha beta pruning
 Daniel Oh
 """
-
-
 class AlphaBetaNode:
     """
     class for nodes in the alpha beta tree
@@ -50,13 +48,6 @@ class AlphaBetaTree:
                     break
 
 
-
-
-
-
-
-
-
 def parse_input():
     """
     Takes the file and puts it in a more python friendly format
@@ -78,14 +69,40 @@ def parse_input():
     for i in range(len(file_text)):  # split along '),(' and shave beginning and ending brackets
         file_text[i][0] = file_text[i][0][2:-2].split('),(')
         for j in range(len(file_text[i][0])):  # splitting tuples
-            file_text[i][0][j] = tuple(file_text[i][0][j].split(','))
+            file_text[i][0][j] = file_text[i][0][j].split(',')
 
         file_text[i][1] = file_text[i][1][2:-2].split('),(')
         for k in range(len(file_text[i][1])):  # splitting tuples
-            file_text[i][1][k] = tuple(file_text[i][1][k].split(','))
+            file_text[i][1][k] = file_text[i][1][k].split(',')
 
-    return file_text
+    # turn the numbers in the input into int type
+    for i in range(len(file_text)):
+        for j in range(len(file_text[i][1])):
+            if is_int(file_text[i][1][j][1]):
+                file_text[i][1][j][1] = int(file_text[i][1][j][1])
 
+    tree_list = []
+    # complexity is n^2 for one tree, n^3 for n trees
+    for i in range(len(file_text)):
+        tree = AlphaBetaTree(file_text[i][0][0][0], file_text[i][0][0][1])
+        for j in range(len(file_text[i][1])):
+            if isinstance(file_text[i][1][j][1], int):
+                tree.insert(file_text[i][1][j][0], file_text[i][1][j][1])
+            else:
+                for k in range(len(file_text[i][0])):
+                    if file_text[i][1][j][1] == file_text[i][0][k][0]:
+                        tree.insert(file_text[i][1][j][0], file_text[i][1][j][1], file_text[i][0][j][1])
+                        break
+        tree_list.append(tree)
+    return tree_list
+
+
+def is_int(n):
+    try:
+        int(n)
+        return True
+    except ValueError:
+        return False
 
 def TreeTest():
     test = AlphaBetaTree('A', 'MIN')
@@ -144,4 +161,4 @@ def main():
 
 
 if __name__ == "__main__":
-    TreeTest()
+    testTreeList = parse_input()

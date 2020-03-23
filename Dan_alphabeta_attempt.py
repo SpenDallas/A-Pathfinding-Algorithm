@@ -1,8 +1,8 @@
 """
 Node class for alpha beta pruning
-Daniel Oh
+This portion of the assignment was assigned to Daniel Oh and Spencer Dallas
 """
-INFINITY = 65535
+
 
 class AlphaBetaNode:
     """
@@ -190,8 +190,20 @@ def TreeTest():
     this is because final leaves are stored directly in the children list
     '''
 
+INFINITY = 65535
+nodesVisited = 0
 
 def minimax(node, alpha, beta):
+    """
+    Author: Spencer Dallas
+    :param node: the AlphaBetaTree object
+    :param alpha: alpha value
+    :param beta: beta value
+    :return: the score
+    """
+
+    global nodesVisited
+    nodesVisited += 1
 
     if isinstance(node, int):
         return node
@@ -223,9 +235,10 @@ if __name__ == "__main__":
     tree_list = parse_input()
     output_list = []
     for i in range(len(tree_list)):
+        nodesVisited = 0
         output_list.append("Graph " + str(i + 1) + ": Score: "
                            + str(minimax(tree_list[i], -INFINITY, INFINITY))
-                           + "; Leaf Nodes Examined: ")
+                           + "; Leaf Nodes Examined: " + str(nodesVisited))
 
     if output_list == []:
         raise IOError("No output given")

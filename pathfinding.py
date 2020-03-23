@@ -138,12 +138,12 @@ def astar(grid, accept_diags):
     # grid goes grid[row][column]
     #
     start_coords, goal_coords = find_start_and_end(grid)
+    # building priority queue for A* implementation
     frontier = []
     heapq.heappush(frontier, (0, start_coords))
-    came_from = {}
     cost_so_far = {}
-    came_from[start_coords] = None
     cost_so_far[start_coords] = 0
+    # path is similar in function to came_from dict in A* pseudocode
     path = [start_coords]
 
     while len(frontier) > 0:
@@ -152,9 +152,11 @@ def astar(grid, accept_diags):
         current = currentprio[1]
         appended = False
 
+        # checking if we started on the goal, if so immediately stop
         if current == goal_coords:
             break
 
+        # checking if the current node is a valid neighbour of the last node
         if (accept_diags):
             if current != start_coords:
                 # checking if this is a valid move
@@ -178,21 +180,22 @@ def astar(grid, accept_diags):
 
         if appended or current == start_coords:
             for neighbour in neighbours:
+                # if we're one step from the goal, stop so as not to overwrite it
                 if neighbour == goal_coords:
                     cost_so_far[neighbour] = 0
                     priority = 0
                     heapq.heappush(frontier, (priority, neighbour))
-                    came_from[neighbour] = current
                     break
 
+                # otherwise, update the queue to reflect newly discovered nodes 
                 new_cost = cost_so_far[current] + 1
                 if neighbour not in cost_so_far or new_cost > cost_so_far[neighbour]:
                     cost_so_far[neighbour] = new_cost
                     priority = new_cost + heuristic(goal_coords, neighbour)
                     clean_queue(frontier, neighbour)
                     heapq.heappush(frontier, (priority, neighbour))
-                    came_from[neighbour] = current
 
+    # popping start of path to not overwrite start coordinate
     path.pop(0)
     return path
 

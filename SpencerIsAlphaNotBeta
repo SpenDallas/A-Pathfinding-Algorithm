@@ -1,8 +1,12 @@
 import DanAttempt
 INFINITY = 65535
+nodesVisited = 0
 
 
 def minimax(node, alpha, beta):
+
+    global nodesVisited
+    nodesVisited += 1
 
     if isinstance(node, int):
         return node
@@ -32,4 +36,7 @@ def minimax(node, alpha, beta):
 
 if __name__ == "__main__":
     for tree in DanAttempt.parse_input():
+        nodesVisited = 0
         print(minimax(tree, -INFINITY, INFINITY))
+        print(nodesVisited)
+        print()

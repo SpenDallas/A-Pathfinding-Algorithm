@@ -2,6 +2,8 @@
 Node class for alpha beta pruning
 Daniel Oh
 """
+INFINITY = 65535
+
 class AlphaBetaNode:
     """
     class for nodes in the alpha beta tree
@@ -41,11 +43,17 @@ class AlphaBetaTree:
                 self.root.insert_child(new_tree)
                 self.root.following_nodes.append(child_data)
         else:
+            exists = False
             for i in range(len(self.root.children)):
                 if parent in self.root.children[i].root.following_nodes:
                     self.root.following_nodes.append(child_data)  # add this
                     self.root.children[i].insert(parent, child_data, child_type)
+                    exists = True
                     break
+            if not exists:
+                raise IndexError("Parent not found")
+
+
 
 
 def parse_input():
@@ -64,7 +72,7 @@ def parse_input():
     """
     with open("alphabeta.txt", 'r') as f_input:
         file_raw = [line for line in f_input.readlines()]
-    file_text = [line[:-1] for line in file_raw[:-1]] + [file_raw[-1]]  # remove all '\n' characters
+    file_text = [line[:-1] for line in file_raw[:-1] if line != "\n"] + [file_raw[-1]]  # remove all '\n' characters
     file_text = [x.split(' ') for x in file_text]  # split each element on the space character; now it's a 2xn list
     for i in range(len(file_text)):  # split along '),(' and shave beginning and ending brackets
         file_text[i][0] = file_text[i][0][2:-2].split('),(')
@@ -82,17 +90,43 @@ def parse_input():
                 file_text[i][1][j][1] = int(file_text[i][1][j][1])
 
     tree_list = []
-    # complexity is n^2 for one tree, n^3 for n trees
     for i in range(len(file_text)):
+        leaf_list = []  # for saving the leaf nodes for last
+        aside_list = []  # for setting aside nodes we don't have parents to yet
         tree = AlphaBetaTree(file_text[i][0][0][0], file_text[i][0][0][1])
         for j in range(len(file_text[i][1])):
-            if isinstance(file_text[i][1][j][1], int):
-                tree.insert(file_text[i][1][j][0], file_text[i][1][j][1])
+            if isinstance(file_text[i][1][j][1], int): # if it's a leaf, save it for later
+                #tree.insert(file_text[i][1][j][0], file_text[i][1][j][1])
+                leaf_list.append(file_text[i][1][j])
             else:
-                for k in range(len(file_text[i][0])):
+                for k in range(len(file_text[i][0])):  # finding what node type this node is
                     if file_text[i][1][j][1] == file_text[i][0][k][0]:
-                        tree.insert(file_text[i][1][j][0], file_text[i][1][j][1], file_text[i][0][j][1])
+                        try:
+                            tree.insert(file_text[i][1][j][0], file_text[i][1][j][1], file_text[i][0][k][1])
+                            # try inserting the nodes we set aside
+                            if aside_list != []:
+                                m = 0  # counter
+                                list_size = len(aside_list)
+                                while m < list_size:
+                                    try:
+                                        tree.insert(aside_list[m][0], aside_list[m][1], aside_list[m][2])
+                                        aside_list.remove([aside_list[m][0], aside_list[m][1], aside_list[m][2]])
+                                        m = 0  # reset the counter
+                                        list_size -= 1
+                                    except IndexError:  # if we can't insert due do lack of parent
+                                        m += 1  # move onto the next node
+                        except IndexError:  # if we can't insert due do lack of parent
+                            # set this node aside for later
+                            aside_list.append([file_text[i][1][j][0], file_text[i][1][j][1], file_text[i][0][k][1]])
                         break
+
+        # add in the leaves
+        try:
+            for leaf in leaf_list:
+                tree.insert(leaf[0], leaf[1])
+        except IndexError:  # we were given an incomplete tree
+            raise IOError("Invalid Tree")
+
         tree_list.append(tree)
     return tree_list
 
@@ -110,6 +144,7 @@ def TreeTest():
     test.insert('A', 'C', 'MAX')
     test.insert('B', 19)
     # A->B->19
+    print(test.root.children[1].root.data)
     print(test.root.children[0].root.children[0])  # should print 19
     # set alpha and beta of B to 7 and 8
     test.root.children[0].root.alpha = 7
@@ -151,14 +186,55 @@ def TreeTest():
     test.root.children[0].root.data
     
     to get 19, we do:
-    test.root.children[0].root.children[0]
+    tree.root.children[0].root.children[0] == 19
     this is because final leaves are stored directly in the children list
     '''
 
 
-def main():
-    pass
+def minimax(node, alpha, beta):
+
+    if isinstance(node, int):
+        return node
+
+    if node.root.node_type == "MAX":
+        bestVal = -INFINITY
+        for child in node.root.children:
+            value = minimax(child, alpha, beta)
+            bestVal = max(bestVal, value)
+            alpha = max(alpha, bestVal)
+            if beta <= alpha:
+                break
+        return bestVal
+
+    elif node.root.node_type == "MIN":
+        bestVal = +INFINITY
+        for child in node.root.children:
+            value = minimax(child, alpha, beta)
+            bestVal = min(bestVal, value)
+            beta = min(beta, bestVal)
+            if beta <= alpha:
+                break
+        return bestVal
+    else:
+        print("Node not of type max or min. Please use valid node types")
 
 
 if __name__ == "__main__":
-    testTreeList = parse_input()
+    tree_list = parse_input()
+    output_list = []
+    for i in range(len(tree_list)):
+        output_list.append("Graph " + str(i + 1) + ": Score: "
+                           + str(minimax(tree_list[i], -INFINITY, INFINITY))
+                           + "; Leaf Nodes Examined: ")
+
+    if output_list == []:
+        raise IOError("No output given")
+
+    # file output
+    with open("alphabeta_out.txt", 'w') as f_output:
+        # add a \n to every line
+        output_list = [x + "\n" for x in output_list]
+        # remove the \n from the last line
+        output_list[-1] = output_list[-1][:-1]
+        # write to the file
+        f_output.writelines(output_list)
